@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Next.js / Node (cubierto también por predix-frontend/.gitignore)
+predix-frontend/node_modules/
+predix-frontend/.next/
+predix-frontend/tsconfig.tsbuildinfo
+predix-frontend/next-env.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+docker-compose.override.yml

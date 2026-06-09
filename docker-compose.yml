@@ -1,0 +1,58 @@
+services:
+
+  # ── PostgreSQL ──────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: predix-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: predix
+      POSTGRES_USER: predix
+      POSTGRES_PASSWORD: predix
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U predix -d predix"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Backend (FastAPI) ───────────────────────────
+  backend:
+    build:
+      context: ./backend
+    container_name: predix-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://predix:predix@postgres:5432/predix
+      SECRET_KEY: ${SECRET_KEY:-predix-dev-secret-key-change-in-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      REFRESH_TOKEN_EXPIRE_DAYS: 30
+      CORS_ORIGINS: http://localhost:3000
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      MEDIA_DIR: /app/media
+    ports:
+      - "8000:8000"
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Frontend (Next.js) ──────────────────────────
+  frontend:
+    build:
+      context: ./predix-frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: predix-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  media_data:
