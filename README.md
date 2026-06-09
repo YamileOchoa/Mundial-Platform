@@ -469,15 +469,6 @@ test:     adición o modificación de tests
 
 ---
 
-## Equipo
-
-| Nombre | Rol |
-|---|---|
-| [YamileOchoa](https://github.com/YamileOchoa) | Desarrollo Full Stack |
-| [Josue-Zapata-v](https://github.com/Josue-Zapata-v) | Desarrollo Full Stack |
-
----
-
 ## Licencia
 
 Distribuido bajo la licencia MIT. Ver [`LICENSE`](LICENSE) para más información.
