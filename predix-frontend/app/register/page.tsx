@@ -7,8 +7,8 @@ import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import PlaceholderImage from '@/components/ui/PlaceholderImage';
 import Logo from '@/components/ui/Logo';
+import AuthIllustration from '@/components/ui/AuthIllustration';
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -63,12 +63,9 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-8">
-          <PlaceholderImage
-            label="Imagen de bienvenida"
-            aspectRatio="4/3"
-            variant="dark"
-            className="w-full max-w-md"
-          />
+          <div className="w-full max-w-md">
+            <AuthIllustration />
+          </div>
           <div>
             <h2 className="text-3xl font-bold text-white">
               Únete a PREDIX

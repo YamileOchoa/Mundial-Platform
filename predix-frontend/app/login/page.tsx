@@ -7,9 +7,9 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import PlaceholderImage from '@/components/ui/PlaceholderImage';
 import Spinner from '@/components/ui/Spinner';
 import Logo from '@/components/ui/Logo';
+import AuthIllustration from '@/components/ui/AuthIllustration';
 
 function LoginForm() {
   const { login } = useAuth();
@@ -56,12 +56,9 @@ function LoginForm() {
         </div>
 
         <div className="flex flex-col gap-8">
-          <PlaceholderImage
-            label="Imagen de bienvenida"
-            aspectRatio="4/3"
-            variant="dark"
-            className="w-full max-w-md"
-          />
+          <div className="w-full max-w-md">
+            <AuthIllustration />
+          </div>
           <div>
             <h2 className="text-3xl font-bold text-white">
               Bienvenido de nuevo
