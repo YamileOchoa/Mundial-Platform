@@ -2,11 +2,11 @@
 
 /* ── Design System Tokens ──────────────────────────────── */
 @theme {
-  /* Primary — SOLO botones e interactivos */
-  --color-primary:        #6631D0;
-  --color-primary-dark:   #5528B8;
-  --color-primary-light:  #DDD6FE;
-  --color-primary-xlight: #F3EEFF;
+  /* Primary — Lavender Premium Theme */
+  --color-primary:        #8b5cf6;
+  --color-primary-dark:   #7c3aed;
+  --color-primary-light:  #c4b5fd;
+  --color-primary-xlight: #f5f3ff;
 
   /* Semantic */
   --color-success:        #10B981;
@@ -104,4 +104,14 @@
 /* ── Flag icons size helper ─────────────────────────────── */
 .fi {
   border-radius: 3px;
+}
+
+/* ── Premium Glassmorphism ────────────────────────────── */
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-sm;
+  }
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_30px_rgb(139,92,246,0.12)] hover:-translate-y-1;
+  }
 }
