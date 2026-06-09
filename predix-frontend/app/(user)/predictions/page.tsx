@@ -2,26 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ListChecks, ArrowRight, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { ListChecks, ArrowRight, CheckCircle2, Clock, XCircle, History } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
 import { getMyPredictions } from '@/services/predictions.service';
 import { getMatch } from '@/services/matches.service';
+import { getMyScoreHistory } from '@/services/stats.service';
 import type { Prediction } from '@/types/prediction';
 import type { Match } from '@/types/match';
+import type { ScoreHistory } from '@/types/score';
 import { formatDateShort } from '@/utils/date';
 import { getTeamCode } from '@/utils/team';
 
 interface PredictionWithMatch { prediction: Prediction; match: Match | null }
 
-type TabKey = 'todos' | 'pendiente' | 'en_curso' | 'terminado';
+type TabKey = 'todos' | 'pendiente' | 'en_curso' | 'terminado' | 'historial';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'todos',     label: 'Todos' },
   { key: 'pendiente', label: 'Proximos' },
   { key: 'en_curso',  label: 'En curso' },
   { key: 'terminado', label: 'Terminados' },
+  { key: 'historial', label: 'Historial pts' },
 ];
 
 function FlagPair({ local, visita }: { local: string; visita: string }) {
@@ -97,15 +100,19 @@ function PredCard({ prediction: p, match }: PredictionWithMatch) {
 }
 
 export default function PredictionsPage() {
-  const [items, setItems]   = useState<PredictionWithMatch[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab]       = useState<TabKey>('todos');
+  const [items, setItems]       = useState<PredictionWithMatch[]>([]);
+  const [scoreHistory, setScoreHistory] = useState<ScoreHistory[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [tab, setTab]           = useState<TabKey>('todos');
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const predictions = await getMyPredictions();
+        const [predictions, history] = await Promise.all([
+          getMyPredictions(),
+          getMyScoreHistory(),
+        ]);
         const uniqueMatchIds = [...new Set(predictions.map(p => p.match_id))];
         const matchResults = await Promise.allSettled(uniqueMatchIds.map(id => getMatch(id)));
         const matchMap = new Map<number, Match>();
@@ -114,6 +121,7 @@ export default function PredictionsPage() {
         });
         if (!cancelled) {
           setItems(predictions.map(p => ({ prediction: p, match: matchMap.get(p.match_id) ?? null })));
+          setScoreHistory(history);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -123,7 +131,9 @@ export default function PredictionsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const filtered = tab === 'todos' ? items : items.filter(({ match }) => match?.estado === tab);
+  const filtered = tab === 'todos' || tab === 'historial'
+    ? items
+    : items.filter(({ match }) => match?.estado === tab);
 
   if (loading) return <div className="flex justify-center py-20"><Spinner size="lg" className="text-primary" /></div>;
 
@@ -149,7 +159,31 @@ export default function PredictionsPage() {
         ))}
       </div>
 
-      {filtered.length === 0 ? (
+      {tab === 'historial' ? (
+        scoreHistory.length === 0 ? (
+          <Card>
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <History size={36} className="text-slate-300" strokeWidth={1.5} />
+              <p className="font-medium text-slate-700">Sin historial de puntos</p>
+              <p className="text-sm text-slate-400">Los puntos aparecen cuando los partidos finalizan</p>
+            </div>
+          </Card>
+        ) : (
+          <Card padding="none">
+            <ol>
+              {scoreHistory.map(entry => (
+                <li key={entry.id} className="flex items-center justify-between border-b border-slate-50 px-5 py-3 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{entry.descripcion ?? entry.regla_aplicada}</p>
+                    <p className="text-xs text-slate-400">Partido #{entry.match_id}</p>
+                  </div>
+                  <span className="text-sm font-bold text-success">+{entry.puntos_ganados} pts</span>
+                </li>
+              ))}
+            </ol>
+          </Card>
+        )
+      ) : filtered.length === 0 ? (
         <Card>
           <div className="flex flex-col items-center gap-3 py-12 text-center">
             <ListChecks size={36} className="text-slate-300" strokeWidth={1.5} />

@@ -23,22 +23,21 @@ function StatRow({ icon: Icon, label, value, color }: StatRowProps) {
   );
 }
 
-export default function ProfilePage() {
-  const { user, refreshUser } = useAuth();
+function ProfileForm({ user, onSaved }: { user: NonNullable<ReturnType<typeof useAuth>['user']>; onSaved: () => Promise<void> }) {
   const [stats, setStats]     = useState<UserStats | null>(null);
-  const [nombre, setNombre]   = useState('');
-  const [fotoUrl, setFotoUrl] = useState('');
+  const [nombre, setNombre]   = useState(user.nombre);
+  const [fotoUrl, setFotoUrl] = useState(user.foto_url ?? '');
   const [saving, setSaving]   = useState(false);
   const [saved, setSaved]     = useState(false);
   const [error, setError]     = useState('');
 
   useEffect(() => {
-    if (user) {
-      setNombre(user.nombre);
-      setFotoUrl(user.foto_url ?? '');
-    }
-    getMyStats().then(setStats).catch(() => {});
-  }, [user]);
+    let cancelled = false;
+    getMyStats()
+      .then(s => { if (!cancelled) setStats(s); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -47,7 +46,7 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       await updateMe({ nombre: nombre.trim(), foto_url: fotoUrl.trim() || undefined });
-      await refreshUser();
+      await onSaved();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch {
@@ -56,8 +55,6 @@ export default function ProfilePage() {
       setSaving(false);
     }
   };
-
-  if (!user) return <div className="flex justify-center py-20"><Spinner size="lg" className="text-primary" /></div>;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 pb-8">
@@ -141,4 +138,12 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+}
+
+export default function ProfilePage() {
+  const { user, refreshUser } = useAuth();
+  if (!user) {
+    return <div className="flex justify-center py-20"><Spinner size="lg" className="text-primary" /></div>;
+  }
+  return <ProfileForm key={user.id} user={user} onSaved={refreshUser} />;
 }
