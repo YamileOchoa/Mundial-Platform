@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import PlaceholderImage from '@/components/ui/PlaceholderImage';
+import Logo from '@/components/ui/Logo';
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -56,9 +57,7 @@ export default function RegisterPage() {
       <div className="relative hidden flex-col justify-between bg-primary p-12 lg:flex">
         <div>
           <Link href="/" className="flex items-center gap-2 text-white">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white/20 text-sm font-bold">
-              P
-            </div>
+            <Logo className="h-8 w-8" />
             <span className="text-xl font-bold tracking-tight">PREDIX</span>
           </Link>
         </div>
@@ -88,9 +87,7 @@ export default function RegisterPage() {
         {/* Mobile header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 lg:hidden">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-white">
-              P
-            </div>
+            <Logo className="h-7 w-7" />
             <span className="text-lg font-bold text-slate-900">PREDIX</span>
           </Link>
         </div>
