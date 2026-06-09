@@ -17,6 +17,9 @@ class MatchResult(BaseModel):
     tipo_tarjeta_real: Optional[str] = None
     minuto_primer_gol: Optional[int] = None
 
+class MatchStatusUpdate(BaseModel):
+    estado: MatchStatus
+
 class MatchResponse(BaseModel):
     id: int
     equipo_local: str
@@ -24,6 +27,10 @@ class MatchResponse(BaseModel):
     fecha_inicio: datetime
     goles_local: Optional[int] = None
     goles_visita: Optional[int] = None
+    goleador_real: Optional[str] = None
+    jugador_tarjeta_real: Optional[str] = None
+    tipo_tarjeta_real: Optional[str] = None
+    minuto_primer_gol: Optional[int] = None
     estado: MatchStatus
     room_id: int
 

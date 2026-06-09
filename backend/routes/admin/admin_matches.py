@@ -3,11 +3,53 @@ from sqlalchemy.orm import Session
 from config.db import get_db
 from config.auth import get_current_admin
 from models.models import Match, MatchStatus, User
-from schemas.match import MatchResult, MatchResponse
+from schemas.match import MatchResult, MatchStatusUpdate, MatchResponse
 from services.scoring import calculate_scores
 from typing import List
 
 router = APIRouter(prefix="/matches", tags=["Admin - Partidos"])
+
+@router.get(
+    "/",
+    response_model=List[MatchResponse],
+    summary="Ver todos los partidos",
+    description="Lista todos los partidos de todas las salas."
+)
+def get_all_matches(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    return db.query(Match).all()
+
+@router.patch(
+    "/{match_id}/status",
+    response_model=MatchResponse,
+    summary="Cambiar estado del partido",
+    description="Cambia el estado de un partido a 'en_curso'. No se puede cambiar el estado de un partido ya terminado."
+)
+def update_match_status(
+    match_id: int,
+    data: MatchStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    match = db.query(Match).filter(Match.id == match_id).first()
+    if not match:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partido no encontrado")
+    if match.estado == MatchStatus.terminado:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El partido ya está terminado, no se puede cambiar el estado"
+        )
+    if data.estado == MatchStatus.terminado:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Para registrar el resultado usa PUT /admin/matches/{id}/result"
+        )
+    match.estado = data.estado
+    db.commit()
+    db.refresh(match)
+    return match
 
 @router.put(
     "/{match_id}/result",
@@ -40,15 +82,3 @@ def set_match_result(
     calculate_scores(match_id=match.id, db=db)
 
     return match
-
-@router.get(
-    "/",
-    response_model=List[MatchResponse],
-    summary="Ver todos los partidos",
-    description="Lista todos los partidos de todas las salas."
-)
-def get_all_matches(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_admin)
-):
-    return db.query(Match).all()

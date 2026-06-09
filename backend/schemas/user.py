@@ -28,4 +28,14 @@ class UserUpdate(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+class UserStats(BaseModel):
+    total_predicciones: int
+    partidos_ganador_correcto: int
+    puntos_totales: int
+    racha_maxima_actual: int

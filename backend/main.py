@@ -17,11 +17,14 @@ from routes.predictions import router as predictions_router
 from routes.leaderboard import router as leaderboard_router
 from routes.rewards import router as rewards_router
 from routes.chat import router as chat_router
+from routes.score_history import router as score_history_router
+from routes.players import router as players_router
 
 # ── Rutas admin ─────────────────────────────────
 from routes.admin.admin_matches import router as admin_matches_router
 from routes.admin.admin_users import router as admin_users_router
 from routes.admin.admin_rooms import router as admin_rooms_router
+from routes.admin.admin_players import router as admin_players_router
 
 # Use venv: python -m venv venv
 # Activate venv: .\venv\Scripts\activate
@@ -33,7 +36,7 @@ from routes.admin.admin_rooms import router as admin_rooms_router
 app = FastAPI(
     title="Mundialito API",
     description="API para predicciones del Mundial de Fútbol. Crea salas, predice resultados y acumula puntos con tus amigos.",
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json"
@@ -57,11 +60,14 @@ app.include_router(predictions_router,  prefix="/api")
 app.include_router(leaderboard_router,  prefix="/api")
 app.include_router(rewards_router,      prefix="/api")
 app.include_router(chat_router,         prefix="/api")
+app.include_router(score_history_router, prefix="/api")
+app.include_router(players_router,      prefix="/api")
 
 # ── Rutas admin (protegidas) ────────────────────
 app.include_router(admin_matches_router, prefix="/api/admin", dependencies=[Depends(get_current_admin)])
 app.include_router(admin_users_router,   prefix="/api/admin", dependencies=[Depends(get_current_admin)])
 app.include_router(admin_rooms_router,   prefix="/api/admin", dependencies=[Depends(get_current_admin)])
+app.include_router(admin_players_router, prefix="/api/admin", dependencies=[Depends(get_current_admin)])
 
 # ── Archivos estáticos (PDFs de sobres) ─────────
 MEDIA_DIR = os.getenv("MEDIA_DIR", "media")

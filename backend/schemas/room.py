@@ -17,3 +17,10 @@ class RoomResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class MemberResponse(BaseModel):
+    user_id: int
+    nombre: str
+    foto_url: Optional[str] = None
+    es_admin: bool
+    joined_at: datetime

@@ -24,6 +24,16 @@ class ScoreHistoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class ScoreHistoryPublicResponse(BaseModel):
+    id: int
+    user_id: int
+    user_nombre: str
+    match_id: int
+    puntos_ganados: int
+    regla_aplicada: str
+    descripcion: Optional[str] = None
+    created_at: datetime
+
 class LeaderboardEntry(BaseModel):
     user_id: int
     nombre: str

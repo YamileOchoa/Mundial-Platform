@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from config.db import get_db
 from config.auth import get_current_user
@@ -12,16 +13,22 @@ router = APIRouter(prefix="/leaderboard", tags=["Leaderboard"])
     "/global",
     response_model=List[LeaderboardEntry],
     summary="Ranking global",
-    description="Retorna el ranking de todos los usuarios ordenado por puntos totales."
+    description="Retorna el ranking de todos los usuarios sumando puntos de todas sus salas."
 )
 def global_leaderboard(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     results = (
-        db.query(User.id, User.nombre, Score.puntos_total, Score.racha_actual)
+        db.query(
+            User.id,
+            User.nombre,
+            func.sum(Score.puntos_total).label("puntos_total"),
+            func.max(Score.racha_actual).label("racha_actual"),
+        )
         .join(Score, Score.user_id == User.id)
-        .order_by(Score.puntos_total.desc())
+        .group_by(User.id, User.nombre)
+        .order_by(func.sum(Score.puntos_total).desc())
         .all()
     )
     return [

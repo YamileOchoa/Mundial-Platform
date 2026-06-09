@@ -40,7 +40,7 @@ def create_match(
 @router.get(
     "/",
     response_model=List[MatchResponse],
-    summary="Ver partidos",
+    summary="Ver partidos de una sala",
     description="Lista los partidos de una sala. Usar ?room_id= para filtrar por sala."
 )
 def get_matches(
@@ -56,3 +56,27 @@ def get_matches(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No eres miembro de esta sala")
 
     return db.query(Match).filter(Match.room_id == room_id).all()
+
+@router.get(
+    "/{match_id}",
+    response_model=MatchResponse,
+    summary="Ver partido por ID",
+    description="Retorna el detalle completo de un partido. Solo accesible para miembros de la sala."
+)
+def get_match(
+    match_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    match = db.query(Match).filter(Match.id == match_id).first()
+    if not match:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partido no encontrado")
+
+    member = db.query(RoomMember).filter(
+        RoomMember.room_id == match.room_id,
+        RoomMember.user_id == current_user.id
+    ).first()
+    if not member:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No eres miembro de la sala de este partido")
+
+    return match
