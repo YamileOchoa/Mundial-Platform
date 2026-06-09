@@ -114,7 +114,10 @@ shadow-modal      0 25px 50px -12px rgba(0,0,0,.15)
 | Contexto | Navbar | Sidebar |
 |----------|--------|---------|
 | Públicas (landing, login, register) | Top blanca | No |
-| Dashboard (todas las rutas auth) | Top blanca | 240px fija (colapsable en mobile) |
+| Dashboard usuario (`/home`, `/rooms`, etc.) | Top blanca con links centrales | No — contenido `max-w-7xl` |
+| Panel Admin (`/admin/*`) | Barra superior mínima | 240px fija (colapsable en mobile) |
+
+**Sin Route Groups.** Rutas explícitas en `app/` (no usar `(dashboard)` ni `(admin)`).
 
 ---
 
@@ -126,22 +129,24 @@ predix-frontend/
 ├── app/
 │   ├── layout.tsx                   ← Root: fuente Rubik + AuthProvider
 │   ├── globals.css
-│   ├── (public)/
-│   │   ├── layout.tsx               ← PublicNavbar wrapper
-│   │   ├── page.tsx                 ← Landing
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx
-│   └── (dashboard)/
-│       ├── layout.tsx               ← AppNavbar + Sidebar + auth guard
-│       ├── home/page.tsx
+│   ├── page.tsx                     ← Landing
+│   ├── login/page.tsx
+│   ├── register/page.tsx
+│   ├── home/layout.tsx + page.tsx   ← UserDashboardLayout
+│   ├── matches/layout.tsx + page.tsx
+│   ├── rooms/layout.tsx + [roomId]/...
+│   ├── predictions/layout.tsx + page.tsx
+│   ├── leaderboard/layout.tsx + page.tsx
+│   ├── rewards/layout.tsx + page.tsx
+│   ├── profile/layout.tsx + page.tsx
+│   ├── chat/layout.tsx + page.tsx
+│   └── admin/
+│       ├── layout.tsx               ← AdminSidebar 240px + auth admin guard
+│       ├── page.tsx
+│       ├── matches/page.tsx
+│       ├── users/page.tsx
 │       ├── rooms/page.tsx
-│       ├── rooms/[id]/page.tsx
-│       ├── rooms/[roomId]/matches/[matchId]/page.tsx
-│       ├── predictions/page.tsx
-│       ├── leaderboard/page.tsx
-│       ├── rewards/page.tsx
-│       ├── profile/page.tsx
-│       └── chat/page.tsx
+│       └── players/page.tsx
 ├── components/
 │   ├── ui/
 │   │   ├── Button.tsx
@@ -151,11 +156,15 @@ predix-frontend/
 │   │   ├── Modal.tsx
 │   │   ├── Spinner.tsx
 │   │   ├── PlaceholderImage.tsx
-│   │   └── CountdownTimer.tsx
+│   │   ├── CountdownTimer.tsx
+│   │   ├── PageHeader.tsx
+│   │   ├── EmptyState.tsx
+│   │   └── ErrorState.tsx
 │   └── layout/
 │       ├── PublicNavbar.tsx
 │       ├── AppNavbar.tsx
-│       └── Sidebar.tsx
+│       ├── UserDashboardLayout.tsx
+│       └── AdminSidebar.tsx
 ├── context/
 │   └── AuthContext.tsx
 ├── hooks/
@@ -172,14 +181,16 @@ predix-frontend/
 │   ├── rewards.service.ts
 │   ├── chat.service.ts
 │   ├── players.service.ts
-│   └── stats.service.ts
+│   ├── stats.service.ts
+│   └── admin.service.ts
 ├── types/
 │   ├── auth.ts
 │   ├── room.ts
 │   ├── match.ts
 │   ├── prediction.ts
 │   ├── score.ts
-│   └── player.ts
+│   ├── player.ts
+│   └── reward.ts
 ├── utils/
 │   ├── date.ts
 │   └── team.ts
@@ -228,6 +239,11 @@ No emojis:   en código ni en UI (solo flag-icons para banderas)
 | Recompensas | GET /api/rewards/my |
 | Perfil | GET /api/users/me · GET /api/users/me/stats · PUT /api/users/me |
 | Chat IA | POST /api/chat/message |
+| Admin Dashboard | GET /api/admin/matches/ · GET /api/admin/users/ · GET /api/admin/rooms/ · GET /api/players/ |
+| Admin Partidos | GET /api/admin/matches/ · PATCH /api/admin/matches/:id/status · PUT /api/admin/matches/:id/result |
+| Admin Usuarios | GET /api/admin/users/ · PUT /api/admin/users/:id/make-admin · DELETE /api/admin/users/:id |
+| Admin Salas | GET /api/admin/rooms/ · DELETE /api/admin/rooms/:id |
+| Admin Jugadores | POST /api/admin/players/ · POST /api/admin/players/bulk · DELETE /api/admin/players/:id |
 
 ---
 
@@ -273,14 +289,17 @@ npm run lint      # ESLint
 - [x] AuthContext.tsx · useAuth.ts · useRooms.ts · useStats.ts
 
 ### Componentes UI
-- [x] Button · Input · Badge · Card · Modal · Spinner · PlaceholderImage
+- [x] Button · Input · Badge · Card · Modal · Spinner · PlaceholderImage · CountdownTimer
 
 ### Layout
-- [x] PublicNavbar · AppNavbar · Sidebar
+- [x] PublicNavbar · AppNavbar (navbar usuario) · AdminSidebar (sidebar admin)
 
 ### Proxy (Route Guard)
 - [x] proxy.ts (Next.js 16 replacement for middleware.ts)
 
-### Páginas
+### Páginas Usuario
 - [x] Landing (/) · Login (/login) · Register (/register) · Dashboard Home (/home)
-- [ ] Mis Salas · Detalle Sala · Detalle Partido · Predicciones · Leaderboard · Recompensas · Perfil · Chat IA
+- [x] Partidos (/matches) · Mis Salas · Detalle Sala · Detalle Partido · Predicciones · Leaderboard · Recompensas · Perfil · Chat IA
+
+### Páginas Admin
+- [x] Dashboard (/admin) · Partidos · Usuarios · Salas · Jugadores

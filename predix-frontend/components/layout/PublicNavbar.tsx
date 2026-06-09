@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Button from '@/components/ui/Button';
+import Logo from '@/components/ui/Logo';
 
 const NAV_LINKS = [
   { href: '#como-funciona', label: 'Como funciona' },
@@ -16,30 +16,23 @@ export default function PublicNavbar() {
   const isHome = pathname === '/';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="relative h-8 w-8 overflow-hidden rounded-md bg-slate-100">
-            {/* Logo placeholder — replace src when image is ready */}
-            <div className="flex h-full w-full items-center justify-center text-xs font-bold text-slate-400">
-              P
-            </div>
+    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
+      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-8 px-5 sm:px-8">
+        <Link href="/" className="flex shrink-0 items-center gap-3">
+          <Logo className="h-10 w-10" />
+          <div>
+            <p className="text-base font-bold leading-none text-slate-900">PREDIX</p>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-400">Mundial 2026</p>
           </div>
-          <span className="text-xl font-bold tracking-tight text-slate-900">
-            PREDIX
-          </span>
         </Link>
 
-        {/* Nav links — visible only on home page, desktop */}
         {isHome && (
-          <nav className="hidden items-center gap-6 md:flex">
-            {NAV_LINKS.map((link) => (
+          <nav className="hidden items-center gap-8 lg:flex">
+            {NAV_LINKS.map(link => (
               <a
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-slate-600 transition-colors hover:text-primary"
+                className="text-[15px] font-medium text-slate-600 transition-colors hover:text-primary"
               >
                 {link.label}
               </a>
@@ -47,17 +40,12 @@ export default function PublicNavbar() {
           </nav>
         )}
 
-        {/* CTA */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link href="/login">
-            <Button variant="ghost" size="sm">
-              Iniciar sesion
-            </Button>
+            <Button variant="ghost" size="md">Iniciar sesion</Button>
           </Link>
           <Link href="/register">
-            <Button variant="primary" size="sm">
-              Registrarse
-            </Button>
+            <Button size="md">Registrarse</Button>
           </Link>
         </div>
       </div>

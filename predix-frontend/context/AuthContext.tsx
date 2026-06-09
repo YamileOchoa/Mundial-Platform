@@ -36,17 +36,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     const token =
       typeof window !== 'undefined'
         ? localStorage.getItem('predix_token')
         : null;
 
-    if (token) {
-      refreshUser().finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
+    if (!token) {
+      queueMicrotask(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+      return () => { cancelled = true; };
     }
-  }, [refreshUser]);
+
+    authService.getMe()
+      .then(me => { if (!cancelled) setUser(me); })
+      .catch(() => { if (!cancelled) setUser(null); })
+      .finally(() => { if (!cancelled) setIsLoading(false); });
+
+    return () => { cancelled = true; };
+  }, []);
 
   const login = async (email: string, password: string) => {
     await authService.login({ email, password });

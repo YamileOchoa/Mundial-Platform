@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trophy, TrendingUp, Flame } from 'lucide-react';
+import { Trophy, Flame } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
@@ -30,8 +30,7 @@ export default function LeaderboardPage() {
     );
   }
 
-  const top3   = entries.slice(0, 3);
-  const rest   = entries.slice(3);
+  const top3 = entries.slice(0, 3);
 
   return (
     <div className="mx-auto max-w-2xl space-y-8 pb-8">

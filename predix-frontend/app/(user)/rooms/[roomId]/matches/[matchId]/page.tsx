@@ -3,11 +3,10 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ChevronLeft, Clock, CheckCircle2, Edit2, AlertCircle, Search, X } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, Edit2, AlertCircle, Search, X } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
 import Spinner from '@/components/ui/Spinner';
 import { getMatch } from '@/services/matches.service';
 import { getMyPredictions, createPrediction, updatePrediction, getMatchPredictions } from '@/services/predictions.service';
@@ -28,10 +27,6 @@ function PlayerSearch({ label, value, onChange }: { label: string; value: string
   const [busy, setBusy]       = useState(false);
   const timerRef              = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapRef               = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setQuery(value);
-  }, [value]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -126,7 +121,7 @@ function ScoreInput({ local, visita, onLocal, onVisita, localTeam, visitaTeam, d
           className="w-16 rounded-lg border border-slate-200 bg-slate-50 text-center text-2xl font-bold text-slate-900 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
         />
       </div>
-      <span className="text-2xl font-black text-slate-300 mt-4">—</span>
+      <span className="text-2xl font-bold text-slate-300 mt-4">—</span>
       <div className="flex flex-col items-center gap-1">
         <span className={`fi fi-${getTeamCode(visitaTeam)} w-8 h-6 rounded`} />
         <span className="text-xs font-medium text-slate-600 max-w-[80px] truncate">{visitaTeam}</span>
@@ -271,7 +266,7 @@ export default function MatchDetailPage() {
             </div>
             <div className="text-center shrink-0">
               {isTerminado ? (
-                <span className="text-3xl font-black text-slate-900">{match.goles_local} — {match.goles_visita}</span>
+                <span className="text-3xl font-bold text-slate-900">{match.goles_local} — {match.goles_visita}</span>
               ) : (
                 <span className="text-lg font-bold text-slate-300">vs</span>
               )}
@@ -285,7 +280,7 @@ export default function MatchDetailPage() {
             <div className="flex flex-wrap justify-center gap-3 text-xs text-slate-500">
               {match.goleador_real     && <span>Goleador: <strong>{match.goleador_real}</strong></span>}
               {match.jugador_tarjeta_real && <span>Tarjeta: <strong>{match.jugador_tarjeta_real}</strong> ({match.tipo_tarjeta_real})</span>}
-              {match.minuto_primer_gol  !== null && <span>Min. primer gol: <strong>{match.minuto_primer_gol}'</strong></span>}
+              {match.minuto_primer_gol  !== null && <span>Min. primer gol: <strong>{match.minuto_primer_gol} min</strong></span>}
             </div>
           )}
         </div>
@@ -307,7 +302,7 @@ export default function MatchDetailPage() {
               <span className={`fi fi-${getTeamCode(match.equipo_local)} w-7 h-5 rounded`} />
               <span className="text-2xl font-bold text-slate-900">{myPrediction.goles_local_pred}</span>
             </div>
-            <span className="text-lg font-black text-slate-300">—</span>
+            <span className="text-lg font-bold text-slate-300">—</span>
             <div className="flex flex-col items-center gap-0.5">
               <span className={`fi fi-${getTeamCode(match.equipo_visita)} w-7 h-5 rounded`} />
               <span className="text-2xl font-bold text-slate-900">{myPrediction.goles_visita_pred}</span>
@@ -317,7 +312,7 @@ export default function MatchDetailPage() {
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
               {myPrediction.goleador_pred      && <span>Goleador: <strong>{myPrediction.goleador_pred}</strong></span>}
               {myPrediction.jugador_tarjeta_pred && <span>Tarjeta: <strong>{myPrediction.jugador_tarjeta_pred}</strong> ({myPrediction.tipo_tarjeta_pred})</span>}
-              {myPrediction.minuto_gol_pred     !== null && myPrediction.minuto_gol_pred !== undefined && <span>Min. gol: <strong>{myPrediction.minuto_gol_pred}'</strong></span>}
+              {myPrediction.minuto_gol_pred     !== null && myPrediction.minuto_gol_pred !== undefined && <span>Min. gol: <strong>{myPrediction.minuto_gol_pred} min</strong></span>}
             </div>
           )}
         </Card>
@@ -353,8 +348,8 @@ export default function MatchDetailPage() {
 
             {showExtras && (
               <div className="flex flex-col gap-4 rounded-lg border border-slate-100 bg-slate-50 p-4">
-                <PlayerSearch label="Goleador (opcional)" value={goleador} onChange={setGoleador} />
-                <PlayerSearch label="Jugador con tarjeta (opcional)" value={jugTarjeta} onChange={setJugTarjeta} />
+                <PlayerSearch key={`goleador-${goleador}`} label="Goleador (opcional)" value={goleador} onChange={setGoleador} />
+                <PlayerSearch key={`tarjeta-${jugTarjeta}`} label="Jugador con tarjeta (opcional)" value={jugTarjeta} onChange={setJugTarjeta} />
                 {jugTarjeta && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-slate-700">Tipo de tarjeta</label>

@@ -1,20 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronLeft, Users, Trophy,
   Copy, Check, LogOut, Clock, Calendar,
-  Crown
+  Crown, Plus,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import { getRoom, getMembers, leaveRoom } from '@/services/rooms.service';
-import { getRoomMatches } from '@/services/matches.service';
+import { getRoomMatches, createMatch } from '@/services/matches.service';
 import { getRoomLeaderboard } from '@/services/leaderboard.service';
 import type { Room, RoomMember } from '@/types/room';
 import type { Match } from '@/types/match';
@@ -94,8 +95,14 @@ export default function RoomDetailPage() {
   const [ranking,   setRanking]   = useState<LeaderboardEntry[]>([]);
   const [tab,       setTab]       = useState<Tab>('partidos');
   const [loading,   setLoading]   = useState(true);
-  const [leaving,   setLeaving]   = useState(false);
-  const [showLeave, setShowLeave] = useState(false);
+  const [leaving,      setLeaving]      = useState(false);
+  const [showLeave,    setShowLeave]    = useState(false);
+  const [showCreate,   setShowCreate]   = useState(false);
+  const [equipoLocal,  setEquipoLocal]  = useState('');
+  const [equipoVisita, setEquipoVisita] = useState('');
+  const [fechaInicio,  setFechaInicio]  = useState('');
+  const [creating,     setCreating]     = useState(false);
+  const [createError,  setCreateError]  = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -117,6 +124,28 @@ export default function RoomDetailPage() {
     load();
     return () => { cancelled = true; };
   }, [params.roomId]);
+
+  const handleCreateMatch = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!equipoLocal.trim() || !equipoVisita.trim() || !fechaInicio) return;
+    setCreateError('');
+    setCreating(true);
+    try {
+      const match = await createMatch({
+        equipo_local: equipoLocal.trim(),
+        equipo_visita: equipoVisita.trim(),
+        fecha_inicio: new Date(fechaInicio).toISOString(),
+        room_id: Number(params.roomId),
+      });
+      setMatches(prev => [...prev, match]);
+      setShowCreate(false);
+      setEquipoLocal(''); setEquipoVisita(''); setFechaInicio('');
+    } catch (err: unknown) {
+      setCreateError((err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? 'No se pudo crear el partido.');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handleLeave = async () => {
     setLeaving(true);
@@ -159,11 +188,18 @@ export default function RoomDetailPage() {
             <CopyCode code={room.codigo_invitacion} />
           </div>
         </div>
-        {!isAdmin && (
-          <Button variant="ghost" size="sm" onClick={() => setShowLeave(true)} className="text-red-500 hover:bg-red-50 hover:text-red-600 self-start">
-            <LogOut size={15} /> Salir de sala
-          </Button>
-        )}
+        <div className="flex gap-2 self-start">
+          {isAdmin && (
+            <Button size="sm" onClick={() => setShowCreate(true)}>
+              <Plus size={15} /> Agregar partido
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button variant="ghost" size="sm" onClick={() => setShowLeave(true)} className="text-danger hover:bg-danger-light hover:text-danger">
+              <LogOut size={15} /> Salir de sala
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
@@ -252,6 +288,28 @@ export default function RoomDetailPage() {
           )}
         </Card>
       )}
+
+      <Modal open={showCreate} onClose={() => { setShowCreate(false); setCreateError(''); }} title="Nuevo partido">
+        <form onSubmit={handleCreateMatch} className="flex flex-col gap-4">
+          <Input label="Equipo local" value={equipoLocal} onChange={e => setEquipoLocal(e.target.value)} placeholder="Ej: Argentina" required />
+          <Input label="Equipo visita" value={equipoVisita} onChange={e => setEquipoVisita(e.target.value)} placeholder="Ej: Espana" required />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-slate-700">Fecha y hora de inicio</label>
+            <input
+              type="datetime-local"
+              value={fechaInicio}
+              onChange={e => setFechaInicio(e.target.value)}
+              required
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          {createError && <p className="text-xs text-danger">{createError}</p>}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>Cancelar</Button>
+            <Button type="submit" loading={creating}>Crear partido</Button>
+          </div>
+        </form>
+      </Modal>
 
       <Modal open={showLeave} onClose={() => setShowLeave(false)} title="Salir de la sala" maxWidth="sm">
         <p className="text-sm text-slate-600 mb-6">

@@ -95,7 +95,10 @@ export function clearAuth() {
   localStorage.removeItem('predix_refresh_token');
   document.cookie = 'predix_token=; path=/; max-age=0';
   if (typeof window !== 'undefined') {
-    window.location.href = '/login';
+    const publicPaths = ['/', '/login', '/register', '/admin/login'];
+    if (!publicPaths.includes(window.location.pathname)) {
+      window.location.href = '/login';
+    }
   }
 }
 
